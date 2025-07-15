@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Linear Regression Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 40%;
+            margin-bottom: 30px;
+        }
+        table, th, td {
+            border: 1px solid #999;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Regression Coefficients</h1>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Coefficient</th>
+        </tr>
+        {% for key, value in coefficients.items() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ "%.4f"|format(value) }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Generated Plot</h2>
+    <img src="{{ plot_url }}" alt="Plot image">
+</body>
+</html>
