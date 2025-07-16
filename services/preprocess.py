@@ -7,15 +7,11 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import seaborn as sns
-import io
-from fastapi.responses import StreamingResponse
-from fastapi import Query
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 import numpy as np
+from datetime import datetime
 
 from models.enums import PlotType
 
@@ -143,12 +139,12 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
     '''
     lin_df.drop('id', axis = 1, inplace = True)
     lin_df.plot.scatter('rm', 'medv')
-    plt.subplots(figsize=(12,8))
-    sns.heatmap(lin_df.corr(), cmap = 'RdGy')
-    sns.pairplot(lin_df, vars = ['lstat', 'ptratio', 'indus', 'tax',
-                                 'crim', 'nox', 'rad', 'age', 'medv'
-                                 ])
-    sns.pairplot(lin_df, vars = ['rm', 'zn', 'black', 'dis', 'chas','medv'])
+    # plt.subplots(figsize=(12,8))
+    # sns.heatmap(lin_df.corr(), cmap = 'RdGy')
+    # sns.pairplot(lin_df, vars = ['lstat', 'ptratio', 'indus', 'tax',
+    #                              'crim', 'nox', 'rad', 'age', 'medv'
+    #                              ])
+    # sns.pairplot(lin_df, vars = ['rm', 'zn', 'black', 'dis', 'chas','medv'])
 
     X = lin_df[['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age',
                 'dis', 'rad', 'tax', 'ptratio', 'black', 'lstat']
@@ -163,41 +159,41 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
 
     predictions = lm.predict(X_test)
 
+    datestamp, timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S").split()
+    timestamp = timestamp.replace(":", "-")
+
     if plot_type == 'hist':
-        fig, ax = plt.subplots()
-        lin_df['medv'].hist(bins=30, ax = ax)
-        ax.set_title('Distribution of medv')
-        ax.set_xlabel('medv')
-        ax.set_ylabel('Frequency')
+        lin_df['medv'].hist(bins=30)
+        plt.title('Distribution of medv')
+        plt.xlabel('medv')
+        plt.ylabel('Frequency')
         plt.tight_layout()
-        plot_path = 'static/plots/medv_histogram.png'
+        plot_path = f'static/plots/medv_histogram_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'box':
-        fig, ax = plt.subplots()
-        sns.boxplot(x='chas', y='medv', data=lin_df, ax = ax)
-        ax.set_title('Median Home Value by Proximity to Charles River')
-        ax.set_xlabel('Tract Bounds Charles River (CHAS)')
-        ax.set_ylabel('Median Value of Homes ($1000s)')
+        sns.boxplot(x='chas', y='medv', data=lin_df)
+        plt.title('Median Home Value by Proximity to Charles River')
+        plt.xlabel('Tract Bounds Charles River (CHAS)')
+        plt.ylabel('Median Value of Homes ($1000s)')
         plt.tight_layout()
-        plot_path = 'static/plots/medv_boxplot.png'
+        plot_path = f'static/plots/medv_boxplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'scatter':
-        fig, ax = plt.subplots()
-        sns.scatterplot(x='lstat', y='medv', data=lin_df, ax = ax)
-        ax.set_title('Home Value vs. Percentage of Lower Status Population')
-        ax.set_xlabel("% Lower Status of Population (LSTAT)")
-        ax.set_ylabel("Median Value of Homes ($1000s)")
+        sns.scatterplot(x='lstat', y='medv', data=lin_df)
+        plt.title('Home Value vs. Percentage of Lower Status Population')
+        plt.xlabel("% Lower Status of Population (LSTAT)")
+        plt.ylabel("Median Value of Homes ($1000s)")
         plt.tight_layout()
-        plot_path = 'static/plots/medv_scatterplot.png'
+        plot_path = f'static/plots/medv_scatterplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'pairplot':
         sns.pairplot(lin_df[['rm', 'lstat', 'medv', 'tax']])
         plt.suptitle("Pairwise Relationships Between Housing Features", y=1.02)
         plt.tight_layout()
-        plot_path = 'static/plots/medv_pairplot.png'
+        plot_path = f'static/plots/medv_pairplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'heatmap':
@@ -205,7 +201,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         sns.heatmap(lin_df.corr(), annot=True, cmap='coolwarm', fmt=".2f", square=True, linewidths=0.5)
         plt.title("Correlation Heatmap of Boston Housing Features")
         plt.tight_layout()
-        plot_path = 'static/plots/medv_heatmap.png'
+        plot_path = f'static/plots/medv_heatmap_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'violin':
@@ -214,7 +210,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         plt.xlabel("Accessibility Index to Radial Highways (RAD)")
         plt.ylabel("Median Value of Homes ($1000s)")
         plt.tight_layout()
-        plot_path = 'static/plots/medv_violinplot.png'
+        plot_path = f'static/plots/medv_violinplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'barplot':
@@ -223,7 +219,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         plt.xlabel('Bounds Charles River (CHAS)')
         plt.ylabel('Average Median Home Value ($1000s)')
         plt.tight_layout()
-        plot_path = 'static/plots/medv_barplot.png'
+        plot_path = f'static/plots/medv_barplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'lineplot':
@@ -232,7 +228,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         plt.xlabel("Sorted Index")
         plt.ylabel("Median Home Value ($1000s)")
         plt.tight_layout()
-        plot_path = 'static/plots/medv_lineplot.png'
+        plot_path = f'static/plots/medv_lineplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     elif plot_type == 'kde':
@@ -241,7 +237,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         plt.xlabel("Median Home Value ($1000s)")
         plt.ylabel("Density")
         plt.tight_layout()
-        plot_path = 'static/plots/medv_kdeplot.png'
+        plot_path = f'static/plots/medv_kdeplot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path, dpi=300)
 
     else:
@@ -254,7 +250,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
         sns.histplot((y_test-predictions),bins=50, kde = True)
         plt.tight_layout()
-        plot_path = 'static/plots/linear_reg_plot.png'
+        plot_path = f'static/plots/linear_reg_plot.png'
         plt.savefig(plot_path)
         plt.close()
 

@@ -1,0 +1,20 @@
+<form 
+	action="/linear_reg_process/" 
+	method="post" 
+	enctype="multipart/form-data"
+	target = "_blank">
+	<label for="plot_type">Plot Type:</label>
+	<select name="plot_type" id = "plot_type" required>
+		<option value="hist">Histogram</option>
+		<option value="box">Box Plot</option>
+    	<option value="scatter">Scatter Plot</option>
+    	<option value="pairplot">Pair Plot</option>
+    	<option value="heatmap">Heatmap</option>
+    	<option value="violin">violin plot</option>
+    	<option value="lineplot">lineplot</option>
+    	<option value="kde">kdeplot</option>
+	</select>
+
+	<input type="file" name="file" accept=".csv" />
+	<button type="submit">Submit</button>
+</form>
