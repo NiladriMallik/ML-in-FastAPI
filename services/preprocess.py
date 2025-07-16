@@ -124,7 +124,7 @@ def preprocess_model_clust_adj_4(df: pd.DataFrame):
     }
 
 
-def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = None) -> Tuple[dict, str]:
+def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = None) -> Tuple[dict, str, pd.DataFrame]:
     '''
     Preprocess the dataset for linear_regression.
 
@@ -150,6 +150,8 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
                 'dis', 'rad', 'tax', 'ptratio', 'black', 'lstat']
                 ]
     y = lin_df['medv']
+
+    lin_df['client_id'] = 42
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
 
@@ -250,7 +252,7 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
         print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
         sns.histplot((y_test-predictions),bins=50, kde = True)
         plt.tight_layout()
-        plot_path = f'static/plots/linear_reg_plot.png'
+        plot_path = f'static/plots/linear_reg_plot_{datestamp}_{timestamp}.png'
         plt.savefig(plot_path)
         plt.close()
 
@@ -260,4 +262,4 @@ def preprocess_linear_reg(lin_df: pd.DataFrame, plot_type: Optional[PlotType] = 
     print(f'Type of coefficients.to_dict: {type(coefficients.to_dict())}')
     print(f'Type of plot_path: {type(plot_path)}')
 
-    return coefficients.to_dict(), plot_path
+    return coefficients.to_dict(), plot_path, lin_df

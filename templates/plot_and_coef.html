@@ -45,5 +45,14 @@
 
     <h2>Generated Plot</h2>
     <img src="{{ plot_url }}" alt="Plot image">
+    <!-- Auto download link -->
+     <a id = "downloadLink" href = "{{ plot_url }}" download style = "display:none;"> </a>
+     <a id = "downloadCSV" href = "{{ csv_url }}" download style = "display:none;"> </a>
+     <script>
+        window.onload = function(){
+            document.getElementById("downloadLink").click();
+            document.getElementById("downloadCSV").click();
+        };
+     </script>
 </body>
 </html>

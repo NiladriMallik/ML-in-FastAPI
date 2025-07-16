@@ -1,3 +1,4 @@
+import os
 import io
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
@@ -10,6 +11,7 @@ from services import eda, train, predict, preprocess
 
 from models.enums import PlotType
 
+import uuid
 
 templates = Jinja2Templates(directory="templates")
 
@@ -68,11 +70,17 @@ async def run_full_linear_reg_pipeline(request: Request,
 
     contents = await file.read()
     df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
-    coef, plot_url = preprocess.preprocess_linear_reg(df, plot_type)
+    coef, plot_url, transformed_df = preprocess.preprocess_linear_reg(df, plot_type)
+
+    # Save the transformed dataframe to csv
+    filename = f"static/processed/{uuid.uuid4().hex}.csv"
+    os.makedirs("static/processed", exist_ok = True)
+    transformed_df.to_csv(filename, index = False)
 
     request.app.state.latest_result = {
         "coefficients" : coef['coefficients'],
-        'plot_url' : f'/{plot_url}'
+        'plot_url' : f'/{plot_url}',
+        "csv_url" : f'/{filename}'
     }
 
     return RedirectResponse(url = '/result', status_code=HTTP_303_SEE_OTHER)
@@ -89,7 +97,8 @@ def show_result(request: Request):
     return templates.TemplateResponse("plot_and_coef.html", {
         "request": request,
         'coefficients' : result['coefficients'],
-        'plot_url' : result['plot_url']
+        'plot_url' : result['plot_url'],
+        "csv_url": result["csv_url"]
     })
 
 @app.get("/", response_class=HTMLResponse)
