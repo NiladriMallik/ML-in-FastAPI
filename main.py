@@ -33,9 +33,12 @@ app.add_middleware(SlowAPIMiddleware)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code = HTTP_429_TOO_MANY_REQUESTS,
-        content = {"detail": "Rate limit exceeded bro. See you later"}
+        content = {
+            "detail": "Rate limit exceeded bro. See you later",
+            "request_details" : f"Rate limit hit at {request.url} from IP: {request.client.host}",
+            "exc_details" : exc.detail
+            }
     )
-
 @app.post("/upload/")
 async def upload_file(request: Request, file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
