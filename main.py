@@ -34,7 +34,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code = HTTP_429_TOO_MANY_REQUESTS,
         content = {
-            "detail": "Rate limit exceeded bro. See you later",
+            "detail": "Rate limit exceeded.",
             "request_details" : f"Rate limit hit at {request.url} from IP: {request.client.host}",
             "exc_details" : exc.detail
             }
